@@ -3,15 +3,15 @@
   "description": "Dead Kafka Node Detection is an incident type that occurs when the Kafka cluster detects the absence of a node that has stopped sending heartbeat signals. Kafka uses heartbeats to monitor the status of each node in a cluster and to detect if they are available or not. When a node is down, it can cause issues with data replication and data consistency. Therefore, this incident requires immediate attention to restore the failed node and ensure the smooth functioning of the Kafka cluster.",
   "params": [
     {
-      "name": "KAFKA_BOOTSTRAP_SERVER",
-      "value": ""
-    },
-    {
       "name": "ZOOKEEPER_SERVER",
       "value": ""
     },
     {
-      "name": "USERNAME",
+      "name": "NODE_HOSTNAME_OR_IP_ADDRESS",
+      "value": ""
+    },
+    {
+      "name": "ZOOKEEPER_NODE",
       "value": ""
     },
     {
@@ -23,7 +23,7 @@
       "value": ""
     },
     {
-      "name": "KAFKA_NODE",
+      "name": "USERNAME",
       "value": ""
     },
     {
@@ -31,15 +31,15 @@
       "value": ""
     },
     {
+      "name": "KAFKA_BOOTSTRAP_SERVER",
+      "value": ""
+    },
+    {
       "name": "CONSUMER_GROUP",
       "value": ""
     },
     {
-      "name": "ZOOKEEPER_NODE",
-      "value": ""
-    },
-    {
-      "name": "NODE_HOSTNAME_OR_IP_ADDRESS",
+      "name": "KAFKA_NODE",
       "value": ""
     },
     {
@@ -132,7 +132,7 @@
       "name": "cell_13",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "host | host_name=$HOST_NAME | invoke_ping_kafka_zookeeper($KAFKA_NODE, $ZOOKEEPER_NODE)"
+      "content": "host | host_name=$HOST_NAME | invoke_ping_nodes($ZOOKEEPER_NODE, $KAFKA_NODE)"
     },
     {
       "name": "cell_14",
@@ -192,7 +192,7 @@
       "name": "cell_23",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "host | host_name=$HOST_NAME | invoke_kafka_logs_tail($USERNAME, $PATH_TO_LOGS_DIRECTORY, $NODE_HOSTNAME_OR_IP_ADDRESS)"
+      "content": "host | host_name=$HOST_NAME | invoke_kafka_logs_tail($NODE_HOSTNAME_OR_IP_ADDRESS, $PATH_TO_LOGS_DIRECTORY, $USERNAME)"
     }
   ]
 }
