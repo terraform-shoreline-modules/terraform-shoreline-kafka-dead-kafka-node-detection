@@ -1,45 +1,33 @@
 {
   "name": "dead_kafka_node_detection",
-  "description": "Dead Kafka Node Detection is an incident type that occurs when the Kafka cluster detects the absence of a node that has stopped sending heartbeat signals. Kafka uses heartbeats to monitor the status of each node in a cluster and to detect if they are available or not. When a node is down, it can cause issues with data replication and data consistency. Therefore, this incident requires immediate attention to restore the failed node and ensure the smooth functioning of the Kafka cluster.",
+  "description": "Dead Kafka Node Detection incident is a type of incident that occurs when a node of the Kafka cluster goes down or fails. Kafka is an open-source distributed event streaming platform used by software engineers to build real-time streaming data pipelines and applications. When a node of the Kafka cluster goes down, it can cause data loss, message duplication, and various other issues. Therefore, it's essential to detect and resolve dead Kafka nodes as quickly as possible to minimize the impact on the system's performance and data integrity.",
   "params": [
     {
-      "name": "ZOOKEEPER_SERVER",
+      "name": "HOSTNAME_OF_THE_FAILED_KAFKA_NODE",
       "value": ""
     },
     {
-      "name": "NODE_HOSTNAME_OR_IP_ADDRESS",
+      "name": "KAFKA_NODE_IP",
       "value": ""
     },
     {
-      "name": "ZOOKEEPER_NODE",
+      "name": "OLD_NODE_HOSTNAME",
       "value": ""
     },
     {
-      "name": "PATH_TO_LOGS_DIRECTORY",
+      "name": "HOSTNAME_OF_THE_NEW_KAFKA_NODE",
       "value": ""
     },
     {
-      "name": "BROKER_ID",
+      "name": "KAFKA_LOG_FILE",
       "value": ""
     },
     {
-      "name": "USERNAME",
+      "name": "KAFKA_DATA_DIRECTORY",
       "value": ""
     },
     {
-      "name": "ZOOKEEPER_PORT",
-      "value": ""
-    },
-    {
-      "name": "KAFKA_BOOTSTRAP_SERVER",
-      "value": ""
-    },
-    {
-      "name": "CONSUMER_GROUP",
-      "value": ""
-    },
-    {
-      "name": "KAFKA_NODE",
+      "name": "ZOOKEEPER_NODE_IP",
       "value": ""
     },
     {
@@ -60,13 +48,13 @@
       "name": "cell_1",
       "type": "MARKDOWN",
       "enabled": true,
-      "content": "## Dead Kafka Node Detection\nDead Kafka Node Detection is an incident type that occurs when the Kafka cluster detects the absence of a node that has stopped sending heartbeat signals. Kafka uses heartbeats to monitor the status of each node in a cluster and to detect if they are available or not. When a node is down, it can cause issues with data replication and data consistency. Therefore, this incident requires immediate attention to restore the failed node and ensure the smooth functioning of the Kafka cluster."
+      "content": "## Dead Kafka Node Detection.\nDead Kafka Node Detection incident is a type of incident that occurs when a node of the Kafka cluster goes down or fails. Kafka is an open-source distributed event streaming platform used by software engineers to build real-time streaming data pipelines and applications. When a node of the Kafka cluster goes down, it can cause data loss, message duplication, and various other issues. Therefore, it's essential to detect and resolve dead Kafka nodes as quickly as possible to minimize the impact on the system's performance and data integrity."
     },
     {
       "name": "cell_2",
       "type": "MARKDOWN",
       "enabled": true,
-      "content": "## 1. Check the status of the Kafka cluster"
+      "content": "## Check if the Kafka service is running"
     },
     {
       "name": "cell_3",
@@ -78,121 +66,73 @@
       "name": "cell_4",
       "type": "MARKDOWN",
       "enabled": true,
-      "content": "## 2. Check the Kafka logs for any error messages"
+      "content": "## Check if the Kafka process is running"
     },
     {
       "name": "cell_5",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `journalctl -u kafka.service | grep ERROR`"
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ps aux | grep kafka`"
     },
     {
       "name": "cell_6",
       "type": "MARKDOWN",
       "enabled": true,
-      "content": "## 3. Verify that all Kafka nodes are up and running"
+      "content": "## Check if the Kafka node is reachable from other nodes in the cluster"
     },
     {
       "name": "cell_7",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-topics.sh --list --bootstrap-server ${KAFKA_BOOTSTRAP_SERVER}`"
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ping ${KAFKA_NODE_IP}`"
     },
     {
       "name": "cell_8",
       "type": "MARKDOWN",
       "enabled": true,
-      "content": "## 4. Check the ZooKeeper logs for any error messages"
+      "content": "## Check if the Kafka node is able to communicate with ZooKeeper"
     },
     {
       "name": "cell_9",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `journalctl -u zookeeper.service | grep ERROR`"
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `echo ruok | nc ${ZOOKEEPER_NODE_IP} 2181`"
     },
     {
       "name": "cell_10",
       "type": "MARKDOWN",
       "enabled": true,
-      "content": "## 5. Verify that all ZooKeeper nodes are up and running"
+      "content": "## Check if the Kafka node is able to access the Kafka data directory"
     },
     {
       "name": "cell_11",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `zkCli.sh -server ${ZOOKEEPER_SERVER} ls /brokers/ids`"
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ls -l ${KAFKA_DATA_DIRECTORY}`"
     },
     {
       "name": "cell_12",
       "type": "MARKDOWN",
       "enabled": true,
-      "content": "## 6. Check the network connectivity between Kafka and ZooKeeper nodes"
+      "content": "## Check if there are any Kafka logs indicating a potential issue with the node"
     },
     {
       "name": "cell_13",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "host | host_name=$HOST_NAME | invoke_ping_nodes($ZOOKEEPER_NODE, $KAFKA_NODE)"
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `tail -n 100 ${KAFKA_LOG_FILE}`"
     },
     {
       "name": "cell_14",
       "type": "MARKDOWN",
       "enabled": true,
-      "content": "## 7. Verify that Kafka is able to connect to ZooKeeper"
+      "content": "## Replace the failed node: If the node is found to be defective, it should be replaced with a new one."
     },
     {
       "name": "cell_15",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-configs.sh --describe --bootstrap-server ${KAFKA_BOOTSTRAP_SERVER} --entity-type brokers --entity-name ${BROKER_ID}`"
-    },
-    {
-      "name": "cell_16",
-      "type": "MARKDOWN",
-      "enabled": true,
-      "content": "## 8. Check the disk space on all Kafka nodes"
-    },
-    {
-      "name": "cell_17",
-      "type": "OP_LANG",
-      "enabled": true,
-      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `df -h`"
-    },
-    {
-      "name": "cell_18",
-      "type": "MARKDOWN",
-      "enabled": true,
-      "content": "## 9. Verify that the ZooKeeper ensemble is in quorum"
-    },
-    {
-      "name": "cell_19",
-      "type": "OP_LANG",
-      "enabled": true,
-      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `echo stat | nc ${ZOOKEEPER_NODE} ${ZOOKEEPER_PORT} | grep Mode`"
-    },
-    {
-      "name": "cell_20",
-      "type": "MARKDOWN",
-      "enabled": true,
-      "content": "## 10. Monitor the Kafka cluster for any unusual activity"
-    },
-    {
-      "name": "cell_21",
-      "type": "OP_LANG",
-      "enabled": true,
-      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-consumer-groups.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVER} --group ${CONSUMER_GROUP} --describe`"
-    },
-    {
-      "name": "cell_22",
-      "type": "MARKDOWN",
-      "enabled": true,
-      "content": "## Check the logs of the failed node to identify the root cause of the failure."
-    },
-    {
-      "name": "cell_23",
-      "type": "OP_LANG",
-      "enabled": true,
-      "content": "host | host_name=$HOST_NAME | invoke_kafka_logs_tail($NODE_HOSTNAME_OR_IP_ADDRESS, $PATH_TO_LOGS_DIRECTORY, $USERNAME)"
+      "content": "host | host_name=$HOST_NAME | invoke_kafka_migration($HOSTNAME_OF_THE_FAILED_KAFKA_NODE, $OLD_NODE_HOSTNAME, $HOSTNAME_OF_THE_NEW_KAFKA_NODE)"
     }
   ]
 }
